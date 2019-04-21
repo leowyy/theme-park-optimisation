@@ -1,0 +1,21 @@
+Ride Number,Name,Must go?,Park Number,Happiness,Ride time (min),Wait time OPT(mins),Wait time PES(mins)
+0,Splash Mountain,0,1,9,11,85,180
+1,Haunted Mansion,0,1,9.5,8,50,55
+2,Space Mountain,0,1,8.5,3,60,175
+3,Seven Dwarfs Mine Train,1,1,10,3,110,150
+4,Its A Small World,0,1,6,11,30,45
+5,Spaceship Earth,0,2,6.5,15,20,35
+6,Mission: SPACE,0,2,5,6,45,50
+7,Test Track,0,2,6.5,4,80,85
+8,Living With The Land,0,2,4,14,15,25
+9,Soarin',1,2,10,5,40,70
+10,Twilight Zone Tower Of Terror,1,3,10,5,85,95
+11,Toy Story Mania,0,3,9,8,50,75
+12,Star tours,0,3,7.5,5,20,35
+13,Slinky Dog Dash,0,3,7.5,2,100,105
+14,Rock n roller coaster Aerosmith,0,3,7.5,17,100,105
+15,Navi River Journey,0,4,6,5,75,85
+16,Avatar Flight of Passage,1,4,10,5,120,200
+17,Expedition Everest: Legend Of The Forbidden Mountain,0,4,10,3,45,50
+18,Kilimanjaro Safaris,0,4,7,19,60,105
+19,Kali River ,0,4,5.5,4,45,100
