@@ -20,8 +20,7 @@ class ParkSolver:
 
         self.max_time = max_time
 
-
-    def get_optimal_tour(self, visited_indices=None, optimistic=True, verbose=True):
+    def get_optimal_tour(self, visited_indices=None, optimistic=True, verbose=True, enforce_must_go=True):
         '''
         Args:
             visited_indices (list): list of indices to visit, defaults to all indices
@@ -37,8 +36,9 @@ class ParkSolver:
 
         visited_indices = np.array(visited_indices)
 
-        # Check must-go condition
-        assert self.must_go.issubset(set(visited_indices)), "Visited indices should include all must-go rides"
+        if enforce_must_go:
+            # Check must-go condition
+            assert self.must_go.issubset(set(visited_indices)), "Visited indices should include all must-go rides"
 
         # Filter by visited_indices
         sub_matrix = self.distance_matrix[visited_indices, :][:, visited_indices]
@@ -79,5 +79,5 @@ if __name__ == "__main__":
     distance_file = 'data/distances.csv'
     data_file = 'data/data.csv'
     park_solver = ParkSolver(distance_file, data_file, max_time=660)
-    visited_indices = [3, 9, 10, 16]
+    visited_indices = [3, 9, 10, 16, 17, 18]
     print(park_solver.get_optimal_tour(visited_indices))
