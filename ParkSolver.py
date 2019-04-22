@@ -20,7 +20,8 @@ class ParkSolver:
 
         self.max_time = max_time
 
-    def get_optimal_tour(self, visited_indices=None, optimistic=True, verbose=True, enforce_must_go=True):
+    def get_optimal_tour(self, visited_indices=None, optimistic=True, verbose=True, 
+                         enforce_must_go=True, two_opt=True, sa=True):
         '''
         Args:
             visited_indices (list): list of indices to visit, defaults to all indices
@@ -43,7 +44,7 @@ class ParkSolver:
         # Filter by visited_indices
         sub_matrix = self.distance_matrix[visited_indices, :][:, visited_indices]
 
-        sub_tour = tsp_solver(sub_matrix, verbose=verbose)
+        sub_tour = tsp_solver(sub_matrix, two_opt, sa, verbose=verbose)
 
         # Map sub_tour indices to original
         tour = visited_indices[sub_tour]

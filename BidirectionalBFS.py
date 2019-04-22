@@ -1,40 +1,69 @@
 from ParkSolver import ParkSolver
 from collections import deque
+from itertools import combinations
+import time
 
 class BidirectionalBFS:
-    def __init__(self, park_solver, num_rides=20, min_rides=3, verbose=True):
+    def __init__(self, park_solver, num_rides=20, min_rides=4, max_rides=12, verbose=True):
         self.max_happiness = 0
         self.best_route = None
         self.min_rides = min_rides
         self.num_rides = 20
         self.park_solver = park_solver
-        self.left = deque({i} for i in range(num_rides))
         self.feasible_supersets = []
         self.unfeasible_subsets = []
         self.verbose = verbose
         
-        # Initialize with sets of min_rides
-        while len(self.left[-1]) < min_rides:
-            cur = self.left.pop()
-            self.explore_supersets(cur)
-
+        self.left = deque()
         self.right = deque()
-        x = set(i for i in range(num_rides))
-        self.right.append(x)
+        for each in combinations(range(num_rides),min_rides):
+            self.left.append(set(each))
+
+        for each in combinations(range(num_rides),max_rides):
+            self.right.append(set(each))
         
     def explore_supersets(self, cur_set):
-        for ride in range(self.num_rides):
-            if ride not in cur_set:
-                superset = cur_set.copy()
-                superset.add(ride)
-                if superset not in self.left:
-                    self.left.appendleft(superset)
+        """
+        Add ride to current set only if no. greater than all existing rides
+
+        Proof:
+            The superset K formed by adding element i to the current set, can be 
+            formed by adding element j from other subsets X, where j != i and X = K-j.
+
+            We only need to consider superset K from by one of these subsets, which we choose 
+            to be the subset that does not contain the max element in K. 
+
+            Hence when we choose to add a ride to the exisiting set, we only add it if its 
+            higher than all elements in the existing set.
+        """
+        for ride in range(max(cur_set)+1, self.num_rides):
+            superset = cur_set.copy()
+            superset.add(ride)
+            self.left.appendleft(superset)
 
     def explore_subsets(self, cur_set):
+        """
+        Remove ride from current set only if ride greater than all missing rides
+
+        Proof: 
+            The subset k formed by removing element i from current set, can also be formed by 
+            removing element j from supersets that are made up only of subset k and element j.
+            Therefore, all immediate supersets of k include k + i, and k + each of the 
+            missing elements in the current set.
+
+            We only need to consider subset k formed by one of these supersets, which we choose 
+            to be the superset containing k and the max element among missing elements and i in
+            the current set. 
+
+            For such a superset, the element i will be greater than all the missing elemtents 
+            in the superset.
+
+        """ 
+        highest = max({i for i in range(20)}.difference(cur_set))
         for ride in cur_set:
-            subset = cur_set.copy()
-            subset.remove(ride)
-            if subset not in self.right:
+            if ride > highest:
+                subset = cur_set.copy()
+                subset.remove(ride)
                 self.right.appendleft(subset)
 
     def is_subset_of_feasible_supersets(self, cur_set):
@@ -55,6 +84,7 @@ class BidirectionalBFS:
             self.max_happiness = happiness
                     
     def solve(self):
+        start_time = time.time()
         while self.left or self.right:
             if self.left:
                 visited_indices = self.left.pop()
@@ -64,7 +94,9 @@ class BidirectionalBFS:
                     # Check current set since no feasible supersets found
                     happiness, is_feasible, tour = self.park_solver.get_optimal_tour(list(visited_indices), 
                                                                                      verbose=False,
-                                                                                     enforce_must_go=False)
+                                                                                     enforce_must_go=False,
+                                                                                     two_opt=True,
+                                                                                     sa=False)
                     if is_feasible:
                         self.explore_supersets(visited_indices)
                         self.update_best(happiness, tour)
@@ -85,7 +117,9 @@ class BidirectionalBFS:
                     # Check current set since no unfeasible subsets found
                     happiness, is_feasible, tour = self.park_solver.get_optimal_tour(list(visited_indices), 
                                                                                      verbose=False,
-                                                                                     enforce_must_go=False)
+                                                                                     enforce_must_go=False,
+                                                                                     two_opt=True,
+                                                                                     sa=False)
                     if is_feasible:
                         self.feasible_supersets.append(visited_indices)
                         self.update_best(happiness, tour)
@@ -100,6 +134,9 @@ class BidirectionalBFS:
 
         print("Maximum Happiness: ", self.max_happiness)
         print("Best Route: ", self.best_route)
+        print("Total Time Taken", time.time()-start_time)
+        
+        self.park_solver.get_optimal_tour(self.best_route, verbose=True, enforce_must_go=False)
         
 if __name__ == "__main__":
     distance_file = 'data/distances.csv'
