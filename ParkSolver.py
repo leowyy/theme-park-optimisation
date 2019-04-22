@@ -6,12 +6,12 @@ import pprint
 
 
 class ParkSolver:
-    def __init__(self, distance_file, data_file, max_time):
+    def __init__(self, distance_file, data_file, max_time, rider_type='Typical'):
         distances = pd.read_csv(distance_file, sep=',',header=None)
         data = pd.read_csv(data_file, sep=',', index_col=0)
 
         self.distance_matrix = distances.values
-        self.happiness = data['Happiness'].values
+        self.happiness = data['Happiness (' + rider_type + ')'].values
         self.ride_time = data['Ride time (min)'].values
         self.opt_wait_time = data['Wait time OPT(mins)'].values
         self.pes_wait_time = data['Wait time PES(mins)'].values
@@ -20,7 +20,7 @@ class ParkSolver:
 
         self.max_time = max_time
 
-    def get_optimal_tour(self, visited_indices=None, optimistic=True, verbose=True, 
+    def get_optimal_tour(self, visited_indices=None, optimistic=True, verbose=True,
                          enforce_must_go=True, two_opt=True, sa=True):
         '''
         Args:
@@ -80,5 +80,5 @@ if __name__ == "__main__":
     distance_file = 'data/distances.csv'
     data_file = 'data/data.csv'
     park_solver = ParkSolver(distance_file, data_file, max_time=660)
-    visited_indices = [3, 9, 10, 16, 17, 18]
+    visited_indices = [3, 9, 10, 16, 17]
     print(park_solver.get_optimal_tour(visited_indices))
