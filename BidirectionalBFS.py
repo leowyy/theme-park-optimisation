@@ -6,20 +6,22 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--rider_type', default='Typical', help='Profile type of rider.')
-parser.add_argument('--verbose', default=False, help='Print BFS optimization output.')
+parser.add_argument('--verbose', action='store_true', help='Print BFS optimization output.')
+parser.add_argument('--optimistic', action='store_true', help='Must satisfy optimistic wait time.')
 
 args = parser.parse_args()
 
 class BidirectionalBFS:
-    def __init__(self, park_solver, num_rides=20, min_rides=4, max_rides=12, verbose=True):
+    def __init__(self, park_solver, num_rides=20, min_rides=4, max_rides=12, verbose=True, optimistic=True):
         self.max_happiness = 0
         self.best_route = None
         self.min_rides = min_rides
-        self.num_rides = 20
+        self.num_rides = num_rides
         self.park_solver = park_solver
         self.feasible_supersets = []
         self.unfeasible_subsets = []
         self.verbose = verbose
+        self.optimistic = optimistic
 
         self.left = deque()
         self.right = deque()
@@ -101,6 +103,7 @@ class BidirectionalBFS:
                     # Check current set since no feasible supersets found
                     happiness, is_feasible, tour = self.park_solver.get_optimal_tour(list(visited_indices),
                                                                                      verbose=False,
+                                                                                     optimistic=self.optimistic,
                                                                                      enforce_must_go=False,
                                                                                      two_opt=False,
                                                                                      sa=False)
@@ -124,6 +127,7 @@ class BidirectionalBFS:
                     # Check current set since no unfeasible subsets found
                     happiness, is_feasible, tour = self.park_solver.get_optimal_tour(list(visited_indices),
                                                                                      verbose=False,
+                                                                                     optimistic=self.optimistic,
                                                                                      enforce_must_go=False,
                                                                                      two_opt=False,
                                                                                      sa=False)
@@ -143,12 +147,13 @@ class BidirectionalBFS:
         print("Best Route: ", self.best_route)
         print("Total Time Taken", time.time()-start_time)
 
-        self.park_solver.get_optimal_tour(self.best_route, verbose=True, enforce_must_go=False)
+        self.park_solver.get_optimal_tour(self.best_route, verbose=True,
+                                          optimistic=self.optimistic, enforce_must_go=False)
 
 if __name__ == "__main__":
     distance_file = 'data/distances.csv'
     data_file = 'data/data.csv'
     park_solver = ParkSolver(distance_file, data_file, 660, args.rider_type)
-    bi_bfs = BidirectionalBFS(park_solver, verbose=args.verbose)
+    bi_bfs = BidirectionalBFS(park_solver, num_rides=20, verbose=args.verbose, optimistic=args.optimistic)
     print("Optimizing for " + args.rider_type)
     bi_bfs.solve()
